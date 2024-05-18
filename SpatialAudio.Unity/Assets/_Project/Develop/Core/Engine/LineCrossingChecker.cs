@@ -33,10 +33,10 @@ namespace SpatialAudio.Code
             if ((a1 * b2 - a2 * b1) == 0)
             {
                 
-                Debug.Log("Прямые параллельны");
+                //Debug.Log("Прямые параллельны");
                 if (a1 * b2 == b1 * a2 && a1 * c2 == a2 * c1 && b1 * c2 == c1 * b2)
                 {
-                    Debug.Log("Прямые совпадают");
+                   // Debug.Log("Прямые совпадают");
                 }
 
                 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Codice.Client.ChangeTrackerService;
 using Core.Engine.Interfaces;
 using UnityEngine;
@@ -11,11 +12,13 @@ namespace SpatialAudio.Code
         private List<IAudioSource> _sources;
         private List<Segment> _segmentsOnScene;
         private IAudioSource _soundListener;
-        
+        private List<Node> _nodesOnScene;
         
         private SoundLine _lineToListener;
-        
+        private WideSearchPathFinder _wideSearchPathFinder;
 
+        private List<SoundPath> _pathsToListener;
+        
         public ISceneDataLoader SceneDataLoader => this;
         public IAudioDataPresenter DataPresenter => this;
 
@@ -24,6 +27,7 @@ namespace SpatialAudio.Code
         public BaseSoundEngine()
         {
             _segmentsOnScene = new List<Segment>();
+            _nodesOnScene = new List<Node>();
             _sources = new List<IAudioSource>();
         }
 
@@ -31,6 +35,8 @@ namespace SpatialAudio.Code
         public void StartEngine()
         {
             _lineToListener = new SoundLine();
+            _wideSearchPathFinder = new WideSearchPathFinder(_segmentsOnScene, _nodesOnScene);
+            Update();
         }
 
         public void StopEngine()
@@ -47,19 +53,7 @@ namespace SpatialAudio.Code
             }
 
             var source = _sources[0];
-            var lineToListener = new Segment(source.Position, _soundListener.Position);
-            _lineToListener.StartPoint = source.Position;
-            _lineToListener.EndPoint = _soundListener.Position;
-
-            if (LineCrossingChecker.GetIntersectionPoint(lineToListener, _segmentsOnScene[0], out var point))
-            {
-                _lineToListener.HasInterspection = true;
-            }
-            else
-            {
-                _lineToListener.HasInterspection = false;
-            }
-
+            _pathsToListener = _wideSearchPathFinder.GetAllPathesToListener(source, _soundListener).ToList();
         }
 
         public void AddAudioSource(IAudioSource source)
@@ -72,6 +66,11 @@ namespace SpatialAudio.Code
             _segmentsOnScene.Add(segment);
         }
 
+        public void AddNode(Node node)
+        {
+            _nodesOnScene.Add(node);
+        }
+
         public void AddSoundListener(IAudioSource source)
         {
             _soundListener = source;
@@ -79,5 +78,7 @@ namespace SpatialAudio.Code
 
 
         public SoundLine GetLineToLisnetener => _lineToListener;
+
+        public List<SoundPath> PathsToListener => _pathsToListener;
     }
 }

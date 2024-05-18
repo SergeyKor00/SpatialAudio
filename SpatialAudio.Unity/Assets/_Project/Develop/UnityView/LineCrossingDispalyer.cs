@@ -5,9 +5,11 @@ using UnityEngine.Serialization;
 
 public class LineCrossingDispalyer : MonoBehaviour
 {
-
-
-    [FormerlySerializedAs("LineToListenerRenderer")] [SerializeField] private LineRenderer lineToListenerRenderer;
+    
+    [SerializeField] private LineRenderer firstlineToListenerRenderer;
+    [SerializeField] private LineRenderer secondlineToListenerRenderer;
+    
+    
     [SerializeField] private Material lineClearMaterial, lineCrossedMaterial;
     
     
@@ -20,13 +22,28 @@ public class LineCrossingDispalyer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        var lineToListener = SceneBootstrap.AudioEngine.DataPresenter.GetLineToLisnetener;
+        var lineToListener = SceneBootstrap.AudioEngine.DataPresenter.PathsToListener;
 
-        var startPoint = lineToListener.StartPoint;
-        var endPoint = lineToListener.EndPoint;
-        lineToListenerRenderer.SetPosition(0, new Vector3(startPoint.x, 0, startPoint.y));
-        lineToListenerRenderer.SetPosition(1, new Vector3(endPoint.x, 0, endPoint.y));
+        firstlineToListenerRenderer.positionCount = lineToListener[0].Points.Length;
+        for (int i = 0; i < lineToListener[0].Points.Length; i++)
+        {
+            var point = lineToListener[0].Points[i];
+            firstlineToListenerRenderer.SetPosition(i, new Vector3(point.x, 0, point.y));
+        }
 
-        lineToListenerRenderer.material = lineToListener.HasInterspection ? lineCrossedMaterial : lineClearMaterial;
+        if (lineToListener.Count < 2)
+        {
+            secondlineToListenerRenderer.positionCount = 0;
+            return;
+        }
+
+        secondlineToListenerRenderer.positionCount = lineToListener[1].Points.Length;
+        for (int i = 0; i < lineToListener[1].Points.Length; i++)
+        {
+            var point = lineToListener[1].Points[i];
+            secondlineToListenerRenderer.SetPosition(i, new Vector3(point.x, 0, point.y));
+        }
+        
+        
     }
 }

@@ -9,6 +9,8 @@ namespace Core.Engine.Interfaces
 
         void AddSegment(Segment segment);
 
+        void AddNode(Node node);
+
         void AddSoundListener(IAudioSource source);
     }
 }
