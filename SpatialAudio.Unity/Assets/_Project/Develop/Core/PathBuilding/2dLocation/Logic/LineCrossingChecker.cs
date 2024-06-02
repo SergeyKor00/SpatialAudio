@@ -1,9 +1,11 @@
-﻿using System;
-using System.Drawing;
+﻿using Core.PathBuilding._2dLocation.Structs;
 using UnityEngine;
 
-namespace SpatialAudio.Code
+namespace Core.PathBuilding._2dLocation.Logic
 {
+    /// <summary>
+    /// Класс с набором статических методов на проверку пересечения отрезков и прямых в 2д- координатах
+    /// </summary>
     public class LineCrossingChecker
     { 
         
@@ -16,6 +18,15 @@ namespace SpatialAudio.Code
             return new Vector2((float)x, (float)y);
         }
 
+        /// <summary>
+        /// Проверка 2ух прямых на пересечение
+        /// </summary>
+        /// <param name="pABDot1">точка 1 на прямой 1</param>
+        /// <param name="pABDot2">точка 2 на прямой 1</param>
+        /// <param name="pCDDot1">точка 1 на прямой 2</param>
+        /// <param name="pCDDot2">точка 2 на прямой 2</param>
+        /// <param name="pCross">возвращает координаты точки пересечения</param>
+        /// <returns>Имеют ли прямые точку пересечения?</returns>
             
         public static bool CheckLinesCrossing(Vector2 pABDot1, Vector2 pABDot2, 
             Vector2 pCDDot1, Vector2 pCDDot2, out Vector2 pCross)
@@ -51,7 +62,7 @@ namespace SpatialAudio.Code
             // Прямые перпендикулярны
             if ((a1 * a2 + b1 * b2) == 0)
             {
-                Debug.Log("Прямые перпендикулярны");
+                //Debug.Log("Прямые перпендикулярны");
                 return true;
             }
             
@@ -60,7 +71,13 @@ namespace SpatialAudio.Code
 
         }
 
-        public static bool PointOnSegment(Vector2 point, Segment segment)
+        /// <summary>
+        /// Проверяет, лежит ли данная точка внутри отрезка
+        /// </summary>
+        /// <param name="point">Точка, которую надо проверить</param>
+        /// <param name="segment">Отрезок, который надо проверить</param>
+        /// <returns>Точка лежит на отрезке?</returns>
+        public static bool CrossPointLiesOnSegment(Vector2 point, Segment segment)
         {
             var xMin = segment.Point1.x < segment.Point2.x ? segment.Point1.x : segment.Point2.x;
             var xMax = segment.Point1.x < segment.Point2.x ? segment.Point2.x : segment.Point1.x;
@@ -76,8 +93,14 @@ namespace SpatialAudio.Code
         }
         
         
-        
-        public static bool GetIntersectionPoint(
+        /// <summary>
+        /// Проверяет 2 отрезка на наличие пересечений и возвращает точку пересечения 
+        /// </summary>
+        /// <param name="segmentOne">Отрезок номер 1</param>
+        /// <param name="segmentTwo">Отрезок номер 2</param>
+        /// <param name="crossPoint">Точка пересечения отрезков</param>
+        /// <returns>Отрезки пересекаются на плоскости?</returns>
+        public static bool GetIntersectionPointIfExists(
             Segment segmentOne, Segment segmentTwo,  out Vector2 crossPoint)
         {
             var lineCrossing =  CheckLinesCrossing(segmentOne.Point1, segmentOne.Point2, segmentTwo.Point1, segmentTwo.Point2, out crossPoint);
@@ -85,7 +108,7 @@ namespace SpatialAudio.Code
             if (!lineCrossing)
                 return false;
 
-            if (!PointOnSegment(crossPoint, segmentOne) || !PointOnSegment(crossPoint, segmentTwo))
+            if (!CrossPointLiesOnSegment(crossPoint, segmentOne) || !CrossPointLiesOnSegment(crossPoint, segmentTwo))
             {
                 return false;
             }

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
+using Core.PathBuilding._2dLocation.Logic;
+using Core.PathBuilding._2dLocation.Structs;
 using NUnit.Framework;
-using SpatialAudio.Code;
 using UnityEngine;
 using UnityEngine.TestTools;
 
@@ -15,7 +16,7 @@ namespace SpatialAudio.Tests
             var segmentTwo =  new Segment(new Vector2(0, 1), new Vector2(0, -1));
             
             
-            Assert.IsTrue(LineCrossingChecker.GetIntersectionPoint(segmentOne, segmentTwo, out var result));
+            Assert.IsTrue(LineCrossingChecker.GetIntersectionPointIfExists(segmentOne, segmentTwo, out var result));
         }
 
         [Test]
@@ -25,7 +26,7 @@ namespace SpatialAudio.Tests
             var segmentTwo =  new Segment(new Vector2(1, 1), new Vector2(1, -1));
             
             
-            LineCrossingChecker.GetIntersectionPoint(segmentOne, segmentTwo, out var result);
+            LineCrossingChecker.GetIntersectionPointIfExists(segmentOne, segmentTwo, out var result);
             Assert.AreEqual(new Vector2(1, 0), result);
             
         }
@@ -38,7 +39,7 @@ namespace SpatialAudio.Tests
             var segmentTwo =  new Segment(new Vector2(1, 1), new Vector2(1, -1));
             
             
-            Assert.IsFalse(LineCrossingChecker.GetIntersectionPoint(segmentOne, segmentTwo, out var result));
+            Assert.IsFalse(LineCrossingChecker.GetIntersectionPointIfExists(segmentOne, segmentTwo, out var result));
            
         }
         
@@ -50,7 +51,7 @@ namespace SpatialAudio.Tests
             var segmentTwo =  new Segment(new Vector2(-1, 1), new Vector2(1, 1));
             
             
-            Assert.IsFalse(LineCrossingChecker.GetIntersectionPoint(segmentOne, segmentTwo, out var result));
+            Assert.IsFalse(LineCrossingChecker.GetIntersectionPointIfExists(segmentOne, segmentTwo, out var result));
            
         }
         
@@ -59,7 +60,7 @@ namespace SpatialAudio.Tests
         public void CheckPointOnSegment()
         {
             var segmentOne = new Segment(new Vector2(-1, 1), new Vector2(1, -1));
-            Assert.IsTrue(LineCrossingChecker.PointOnSegment(Vector2.zero, segmentOne));
+            Assert.IsTrue(LineCrossingChecker.CrossPointLiesOnSegment(Vector2.zero, segmentOne));
            
         }
         
@@ -71,7 +72,7 @@ namespace SpatialAudio.Tests
             Segment segment = new Segment(new Vector2(1, 1), new Vector2(4, 5));
 
             // Act
-            bool result = LineCrossingChecker.PointOnSegment(point, segment);
+            bool result = LineCrossingChecker.CrossPointLiesOnSegment(point, segment);
 
             // Assert
             Assert.IsTrue(result);
@@ -85,7 +86,7 @@ namespace SpatialAudio.Tests
             Segment segment = new Segment(new Vector2(1, 1), new Vector2(4, 5));
 
             // Act
-            bool result = LineCrossingChecker.PointOnSegment(point, segment);
+            bool result = LineCrossingChecker.CrossPointLiesOnSegment(point, segment);
 
             // Assert
             Assert.IsFalse(result);
@@ -99,7 +100,7 @@ namespace SpatialAudio.Tests
             Segment segment = new Segment(new Vector2(1, 2), new Vector2(5, 2));
 
             // Act
-            bool result = LineCrossingChecker.PointOnSegment(point, segment);
+            bool result = LineCrossingChecker.CrossPointLiesOnSegment(point, segment);
 
             // Assert
             Assert.IsTrue(result);
@@ -113,7 +114,7 @@ namespace SpatialAudio.Tests
             Segment segment = new Segment(new Vector2(4, 1), new Vector2(4, 5));
 
             // Act
-            bool result = LineCrossingChecker.PointOnSegment(point, segment);
+            bool result = LineCrossingChecker.CrossPointLiesOnSegment(point, segment);
 
             // Assert
             Assert.IsTrue(result);
@@ -127,7 +128,7 @@ namespace SpatialAudio.Tests
             Segment segment = new Segment(new Vector2(4, 3), new Vector2(4, 5));
 
             // Act
-            bool result = LineCrossingChecker.PointOnSegment(point, segment);
+            bool result = LineCrossingChecker.CrossPointLiesOnSegment(point, segment);
 
             // Assert
             Assert.IsTrue(result);

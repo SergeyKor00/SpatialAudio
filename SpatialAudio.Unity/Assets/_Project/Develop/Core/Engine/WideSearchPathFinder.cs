@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Core.Engine.Interfaces;
+using Core.PathBuilding._2dLocation.Logic;
 using UnityEngine;
 
 namespace SpatialAudio.Code
@@ -119,8 +120,8 @@ namespace SpatialAudio.Code
         
         private bool CheckLineHasAnyClossed(Vector2 origin, Vector2 target, out CrossData crossData)
         {
-            var segmentToCompare = new Segment(origin, target);
-
+            var segmentToCompare = new Core.PathBuilding._2dLocation.Structs.Segment(origin, target);
+            
             List<CrossData> crossesBeenFound = new List<CrossData>();
             
             foreach (var s in _segmentsOnScene)
@@ -128,12 +129,12 @@ namespace SpatialAudio.Code
                 if(s.SegmentBeenChecked)
                     continue;
                 
-                if (LineCrossingChecker.GetIntersectionPoint(segmentToCompare, s, out var point))
+                if (LineCrossingChecker.GetIntersectionPointIfExists(segmentToCompare, new Core.PathBuilding._2dLocation.Structs.Segment(s.Point1, s.Point2), out var point))
                 {
                     crossesBeenFound.Add(new CrossData(){CrossedSegment = s, CrossPoint = point});
                 }
             }
-
+            
             if (crossesBeenFound.Count == 0)
             {
                 crossData = new CrossData();
@@ -145,7 +146,7 @@ namespace SpatialAudio.Code
                 {
                     return Vector2.SqrMagnitude(point1.CrossPoint - origin).CompareTo(Vector2.SqrMagnitude(point2.CrossPoint - origin));
                 } );
-
+            
                 crossData = crossesBeenFound[0];
                 return true;
             }
