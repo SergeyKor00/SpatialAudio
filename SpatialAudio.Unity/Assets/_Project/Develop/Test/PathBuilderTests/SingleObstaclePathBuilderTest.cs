@@ -1,4 +1,5 @@
-﻿using Core.PathBuilding._2dLocation.Logic;
+﻿using System.Linq;
+using Core.PathBuilding._2dLocation.Logic;
 using Core.PathBuilding._2dLocation.Structs;
 using Core.PathBuilding.Interfaces;
 using NUnit.Framework;
@@ -81,7 +82,7 @@ namespace SpatialAudio.Tests.PathBuilderTests
 
 
         [Test]
-        public void SetListenerBeyondTriangleCheckLastNodeHasTwoEdges()
+        public void SetListenerBeyondTriangleCheckListenerHasTwoEdges()
         {
             //Arrange
             source.Position = Vector2.zero;
@@ -91,7 +92,69 @@ namespace SpatialAudio.Tests.PathBuilderTests
             var pathGraph = pathBuilder.CreateGraph();
             
             Assert.AreEqual(2, pathGraph.Listener.InnerEdges.Count);
+        }
+        
+        
+        [Test]
+        public void SetListenerBeyondTriangleCheckSourceHasTwoEdges()
+        {
+            //Arrange
+            source.Position = Vector2.zero;
+            listener.Position = new Vector2(-1, 3);
+            
+            //Act
+            var pathGraph = pathBuilder.CreateGraph();
+            
+            Assert.AreEqual(2, pathGraph.SoundSources[0].OuterEdges.Count);
+        }
+
+
+        [Test]
+        public void SetListenerBeyondTriangleCheckLeftPathVertexPositions()
+        {
+            source.Position = Vector2.zero;
+            listener.Position = new Vector2(-1, 3);
+            
+            //Act
+            var pathGraph = pathBuilder.CreateGraph();
+            var leftEdge = pathGraph.SoundSources[0].OuterEdges[1];
+            Assert.AreEqual(vertexStorage.GetVertexById(1).Position, leftEdge.EndNode.MyAnchor.Position);
+            Assert.AreEqual(pathGraph.SoundSources[0].MyAnchor.Position, leftEdge.StartNode.MyAnchor.Position);
+            Assert.AreEqual(listener.Position, leftEdge.EndNode.OuterEdges[0].EndNode.MyAnchor.Position);
+        }
+        
+        [Test]
+        public void SetListenerBeyondTriangleCheckLeftPathEdgesAndNodesInContainer()
+        {
+            source.Position = Vector2.zero;
+            listener.Position = new Vector2(-1, 3);
+            
+            //Act
+            var pathGraph = pathBuilder.CreateGraph();
+            var leftEdge = pathGraph.SoundSources[0].OuterEdges[1];
+            
+            Assert.AreEqual(1, leftEdge.EndNode.InnerEdges.Count);
+            Assert.AreEqual(1, leftEdge.EndNode.OuterEdges.Count);
+            
             
         }
+        
+        [Test]
+        public void SetSourceBeyondTriangleCheckLeftPathEdgesAndNodesInContainer()
+        {
+            source.Position = new Vector2(-1, 3);
+            listener.Position = Vector2.zero;
+            
+            //Act
+            var pathGraph = pathBuilder.CreateGraph();
+            var leftEdge = pathGraph.SoundSources[0].OuterEdges[0];
+            
+           
+            Assert.AreEqual(vertexStorage.GetVertexById(1).Position, leftEdge.EndNode.MyAnchor.Position);
+            Assert.AreEqual(pathGraph.SoundSources[0].MyAnchor.Position, leftEdge.StartNode.MyAnchor.Position);
+            Assert.AreEqual(listener.Position, leftEdge.EndNode.OuterEdges[0].EndNode.MyAnchor.Position);
+        }
+        
+        
     }
 }

@@ -96,8 +96,8 @@ namespace Core.PathBuilding._2dLocation.Logic
             _pathGraph.Nodes.Add(vertex.Id, newNode);
             
             ConnectEdges(previewNode, newNode);
+            
             return newNode;
-
         }
         
         
@@ -111,7 +111,63 @@ namespace Core.PathBuilding._2dLocation.Logic
             var connectionEdge = new EdgeInPath(startNode, endNode);
             startNode.OuterEdges.Add(connectionEdge);
             endNode.InnerEdges.Add(connectionEdge);
+            
         }
+
+        private void OptimizePathFromPreviewNodes(NodeInPath nodeToAvoid, NodeInPath currNode, Line connectionLine)
+        {
+            if(nodeToAvoid.InnerEdges.Count == 0)
+                return;
+
+            
+            var nodesToCheck = nodeToAvoid.InnerEdges.Select(e => e.StartNode);
+            foreach (var node in nodesToCheck)
+            {
+                if (Vector2.Angle(node.MyAnchor.Position - currNode.MyAnchor.Position, connectionLine.NormalVector) >= 90.0f)
+                {
+                    continue;
+                }
+
+                var segmentToTarget = new Segment(node.MyAnchor.Position, currNode.MyAnchor.Position);
+                var linesToAvoid = new List<int>();
+                var currVertex = currNode.MyAnchor as Vertex;
+                
+                linesToAvoid.Add(currVertex.RightLine.Id);
+                linesToAvoid.Add(currVertex.LeftLine.Id);
+
+                if (node.InnerEdges.Count != 0)
+                {
+                    linesToAvoid.Add((node.MyAnchor as Vertex).RightLine.Id);
+                    linesToAvoid.Add((node.MyAnchor as Vertex).LeftLine.Id);
+                }
+
+                if (CheckSegmentHasInterseptions(segmentToTarget, linesToAvoid))
+                {
+                    continue;
+                }
+                
+                ReplaceNode(currNode, nodeToAvoid, node);
+                
+               
+            }
+        }
+
+        private bool CheckSegmentHasInterseptions(Segment segmentToTarget, List<int> linesToAvoid)
+        {
+            
+            
+            foreach (var l in GetLinesToCheck(segmentToTarget, linesToAvoid))
+            {
+                if (!LineCrossingChecker.GetIntersectionPointIfExists(segmentToTarget, l.GetSegment,
+                        out var result))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
 
         /// <summary>
         /// найти точку пересечения отрезка с препятствиями
@@ -158,11 +214,12 @@ namespace Core.PathBuilding._2dLocation.Logic
             if (_pathGraph.Nodes.TryGetValue(vertex.Id, out var node))
             {
                 ConnectEdges(previewNode, node);
+                OptimizePathFromPreviewNodes(previewNode, node, previewLine);
                 return;
             }
 
             var nodeAtVertex = CreateNodeAtVertex(vertex, previewNode, pathGraph);
-            
+            OptimizePathFromPreviewNodes(previewNode, nodeAtVertex, previewLine);
             //var vertex = nodeWithVertex.MyAnchor as Vertex;
             var nextLine = vertex.LeftLine == previewLine ? vertex.RightLine : vertex.LeftLine;
             
@@ -194,7 +251,21 @@ namespace Core.PathBuilding._2dLocation.Logic
         {
            return _linesStorage.GetAllLines().Where(l => !linesToAvoid.Contains(l.Id));
         }
-        
+
+        private void ReplaceNode(NodeInPath currNode, NodeInPath nodeToRemove, NodeInPath nodeToAdd)
+        {
+            ConnectEdges(nodeToAdd, currNode);
+            nodeToAdd.RemoveEdgeWithNode(nodeToRemove);
+            currNode.RemoveEdgeWithNode(nodeToRemove);
+            
+            nodeToRemove.RemoveEdgeWithNode(nodeToAdd);
+            nodeToRemove.RemoveEdgeWithNode(currNode);
+
+            if (nodeToRemove.InnerEdges.Count == 0 && nodeToRemove.OuterEdges.Count == 0)
+            {
+                _pathGraph.Nodes.Remove((nodeToRemove.MyAnchor as Vertex).Id);
+            }
+        }
         
         
         
